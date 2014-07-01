@@ -1,12 +1,12 @@
 class PhotosView extends Backbone.View {
 
   initialize() {
-    this.template = $('script[name="photos"]').html();
+    this.template = _.template($('script[name="photos"]').html());
     this.url = 'http://photo-sync.herokuapp.com/photos';
     this.urls = [];
 
     // should throttle it and avoid calling multiple times
-    $(window).scroll(_.bind(_.throttle(this.onScroll, 1), this));
+    $(window).scroll(_.bind(_.throttle(this.onScroll, 200), this));
   }
 
   render() {
@@ -14,13 +14,7 @@ class PhotosView extends Backbone.View {
 
     var _this = this;
     _this.urls.push(_this.url);
-    $.getJSON(this.url).done(function (data) {
-      _this.url = data.nextURL;
-      
-      _this.$el.html(_.template(_this.template, {
-        photos: _this.resizePhotos(data.photos)
-      }));
-    });
+    $.getJSON(this.url).done(_.bind(this.success, this, false));
 
     return this;
   }
@@ -57,7 +51,7 @@ class PhotosView extends Backbone.View {
     return _.forEach(this.group(photos), function (photoGroup) {
       var maxWH = 160;
 
-      photoGroup = _.forEach(photoGroup, function (photo) {
+      _.forEach(photoGroup, function (photo) {
         var w = photo.width;
         var h = photo.height;
         var ratio = parseFloat(w / h);
@@ -81,21 +75,28 @@ class PhotosView extends Backbone.View {
   onScroll() {
     // let it cache the photos before scroll to bottom
     if ($(window).scrollTop() + $(window).height() > $(document).height() - 85) {
-      var _this = this;
 
       if (this.urls.indexOf(this.url) !== -1) {
         return;
       }
 
       console.log('getJSON for ' + this.url);
-      _this.urls.push(_this.url);
-      $.getJSON(this.url).done(function (data) {
-        _this.url = data.nextURL;
+      this.urls.push(this.url);
+      $.getJSON(this.url).done(_.bind(this.success, this, true));
+    }
+  }
 
-        _this.$el.append(_.template(_this.template, {
-          photos: _this.resizePhotos(data.photos)
-        }));
-      });
+  success(isAppend, data) {
+    this.url = data.nextURL;
+
+    var html = this.template({
+      photos: this.resizePhotos(data.photos)
+    });
+
+    if (!isAppend) {
+      this.$el.html(html);
+    } else {
+      this.$el.append(html);
     }
   }
 
