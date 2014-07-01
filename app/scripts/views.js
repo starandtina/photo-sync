@@ -3,19 +3,20 @@ class PhotosView extends Backbone.View {
   initialize() {
     this.template = $('script[name="photos"]').html();
     this.url = 'http://photo-sync.herokuapp.com/photos';
-    this.nextURL = null;
+    this.urls = [];
 
     // should throttle it and avoid calling multiple times
-    $(window).scroll(_.bind(_.throttle(this.onScroll, 200), this));
+    $(window).scroll(_.bind(_.throttle(this.onScroll, 1), this));
   }
 
   render() {
     this.$el.html('<h1>loading photos...</h1>');
 
     var _this = this;
+    _this.urls.push(_this.url);
     $.getJSON(this.url).done(function (data) {
-      _this.nextURL = data.nextURL;
-
+      _this.url = data.nextURL;
+      
       _this.$el.html(_.template(_this.template, {
         photos: _this.resizePhotos(data.photos)
       }));
@@ -82,17 +83,19 @@ class PhotosView extends Backbone.View {
     if ($(window).scrollTop() + $(window).height() > $(document).height() - 85) {
       var _this = this;
 
-      if (this.nextURL !== this.url) {
-        console.log('getJSON for ' + this.url);
-        $.getJSON(this.url).done(function (data) {
-          _this.url = _this.nextURL;
-          _this.nextURL = data.nextURL;
-
-          _this.$el.html(_.template(_this.template, {
-            photos: _this.resizePhotos(data.photos)
-          }));
-        });
+      if (this.urls.indexOf(this.url) !== -1) {
+        return;
       }
+
+      console.log('getJSON for ' + this.url);
+      _this.urls.push(_this.url);
+      $.getJSON(this.url).done(function (data) {
+        _this.url = data.nextURL;
+
+        _this.$el.append(_.template(_this.template, {
+          photos: _this.resizePhotos(data.photos)
+        }));
+      });
     }
   }
 
