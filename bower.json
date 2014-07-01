@@ -1,0 +1,26 @@
+{
+  "name": "photo-sync",
+  "version": "0.1.0",
+  "authors": [
+    "starandtina <kandmforever@126.com>"
+  ],
+  "description": "Photo sync exercise using Backbone + Traceur with ES6 Modules and Classes",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "~1.1.2",
+    "es6-module-loader": "~0.6.1",
+    "jquery": "~2.1.1",
+    "underscore": "~1.6.0",
+    "traceur": "~0.0.49",
+    "es6-promise": "~1.0.0",
+    "bootstrap": "~3.2.0"
+  }
+}
