@@ -1,4 +1,4 @@
 photo-sync
 ==========
 
-front end photo sync exercise
+Photo sync exercise based on ES6 + Backbone.
